@@ -1,0 +1,4 @@
+## Note - This file is being managed with puppet
+127.0.0.1 localhost
+127.0.0.1 <%fqdn%>
+<%ipaddress%>   mgmtnode.adaptive.com   mgmtnode
