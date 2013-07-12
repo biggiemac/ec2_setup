@@ -14,16 +14,16 @@ service { "iptables":
 file { "/etc/selinux/config":
     ensure  => present,
     content => "# This file is managed via Puppet, plan accordingly
-			 # This file controls the state of SELinux on the system.
-			 # SELINUX= can take one of these three values:
-			 #       enforcing - SELinux security policy is enforced.
-			 #       permissive - SELinux prints warnings instead of enforcing.
-			 #       disabled - SELinux is fully disabled.
-			 SELINUX=disabled
-			 # SELINUXTYPE= type of policy in use. Possible values are:
-			 #       targeted - Only targeted network daemons are protected.
-			 #       strict - Full SELinux protection.
-			 SELINUXTYPE=permissive",
+                # This file controls the state of SELinux on the system.
+                # SELINUX= can take one of these three values:
+                #       enforcing - SELinux security policy is enforced.
+                #       permissive - SELinux prints warnings instead of enforcing.
+                #       disabled - SELinux is fully disabled.
+                SELINUX=disabled
+                # SELINUXTYPE= type of policy in use. Possible values are:
+                #       targeted - Only targeted network daemons are protected.
+                #       strict - Full SELinux protection.
+                SELINUXTYPE=permissive",
 }
 
 ##
@@ -32,10 +32,18 @@ file { "/etc/selinux/config":
 
 file { "/etc/sysconfig/network":
     ensure  => present,
-    content => "NETWORKING="yes" HOSTNAME="mgmtnode.adaptive.com"",
+    content => "NETWORKING=yes NETWORKING_IPV6=no HOSTNAME=mgmtnode.adaptive.com",
+}
+
+## Here we manage the hosts file
+
+file { "/etc/hosts":
+    ensure  => present,
+    content => template("/tmp/ec2_setup/templates/hosts.template"),
 }
 
 ## Here we manage users - Rinse and repeat the code block with the max number of students anticipated
+## Note - The password hash here for user alice and copies of the block is "Cluster2"
 
 user { 'alice':
   ensure           => 'present',
@@ -64,4 +72,13 @@ package { "php*":
 package { "httpd":
     ensure => installed,
 }
+
+## Time to setup ldap, I basically setup the ldap server per Shawn's script.
+## I placed this in the files dir of the repo and then run it here via puppet
+
+exec { "ldap_setup":
+    command => "/bin/sh /tmp/ec2_setup/files/ldap_server_setup.sh",
+    creates => "/tmp/configured_ldap_server.txt",
+}
+
 
